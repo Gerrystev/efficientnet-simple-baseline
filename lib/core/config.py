@@ -21,7 +21,7 @@ config.OUTPUT_DIR = ''
 config.LOG_DIR = ''
 config.DATA_DIR = ''
 config.GPUS = '0'
-config.WORKERS = 1
+config.WORKERS = 4
 config.PRINT_FREQ = 20
 
 # Cudnn related params
@@ -95,14 +95,14 @@ config.TRAIN.END_EPOCH = 140
 config.TRAIN.RESUME = False
 config.TRAIN.CHECKPOINT = ''
 
-config.TRAIN.BATCH_SIZE = 1
+config.TRAIN.BATCH_SIZE = 32
 config.TRAIN.SHUFFLE = True
 
 # testing
 config.TEST = edict()
 
 # size of images for each device
-config.TEST.BATCH_SIZE = 1
+config.TEST.BATCH_SIZE = 32
 # Test Model Epoch
 config.TEST.FLIP_TEST = False
 config.TEST.POST_PROCESS = True

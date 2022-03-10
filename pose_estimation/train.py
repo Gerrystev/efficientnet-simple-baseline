@@ -93,9 +93,6 @@ def reset_config(config, args):
 
 
 def main():
-    os.chdir("..")
-    print(os.getcwd())
-
     args = parse_args()
     reset_config(config, args)
 
