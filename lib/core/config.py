@@ -207,7 +207,7 @@ def get_model_name(cfg):
     full_name = cfg.MODEL.NAME
     extra = cfg.MODEL.EXTRA
     if name in ['pose_efficient']:
-        name = '{model}_{num_layers}'.format(
+        name = '{model}'.format(
             model=name,
             num_layers=extra.NUM_LAYERS)
         deconv_suffix = ''.join(
