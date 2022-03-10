@@ -93,6 +93,9 @@ def reset_config(config, args):
 
 
 def main():
+    os.chdir("..")
+    print(os.getcwd())
+
     args = parse_args()
     reset_config(config, args)
 
@@ -146,8 +149,7 @@ def main():
     # Data loading code
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
-    os.chdir("..")
-    print(os.getcwd())
+
     train_dataset = eval('dataset.'+config.DATASET.DATASET)(
         config,
         config.DATASET.ROOT,
