@@ -46,9 +46,9 @@ def fliplr_joints(joints, joints_vis, width, matched_parts):
     return joints*joints_vis, joints_vis
 
 
-def transform_preds(coords, center, scale, output_size):
+def transform_preds(coords):
     target_coords = np.zeros(coords.shape)
-    trans = get_affine_transform(center, scale, 0, output_size, inv=1)
+    trans = np.ones((2, 3), dtype=np.float32)
     for p in range(coords.shape[0]):
         target_coords[p, 0:2] = affine_transform(coords[p, 0:2], trans)
     return target_coords

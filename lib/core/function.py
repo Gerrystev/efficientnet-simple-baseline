@@ -143,10 +143,13 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
             batch_time.update(time.time() - end)
             end = time.time()
 
+            c = meta['center'].numpy()
+            s = meta['scale'].numpy()
             score = meta['score'].numpy()
 
             preds, maxvals = get_final_preds(
-                config, output.clone().cpu().numpy(), c, s)
+                config, output.clone().cpu().numpy()
+            )
 
             all_preds[idx:idx + num_images, :, 0:2] = preds[:, :, 0:2]
             all_preds[idx:idx + num_images, :, 2:3] = maxvals
