@@ -63,7 +63,7 @@ config.LOSS.USE_TARGET_WEIGHT = True
 # DATASET related params
 config.DATASET = edict()
 config.DATASET.ROOT = ''
-config.DATASET.DATASET = 'mpii'
+config.DATASET.DATASET = 'humaneva'
 config.DATASET.TRAIN_SET = 'train'
 config.DATASET.TEST_SET = 'valid'
 config.DATASET.DATA_FORMAT = 'jpg'

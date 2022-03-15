@@ -9,8 +9,8 @@ CUDNN:
   DETERMINISTIC: False
   ENABLED: True
 DATASET:
-  DATASET: mpii
-  ROOT: 'data/mpii/'
+  DATASET: humaneva
+  ROOT: 'data/humaneva/'
   TEST_SET: valid
   TRAIN_SET: train
   FLIP: true
@@ -22,7 +22,7 @@ MODEL:
   IMAGE_SIZE:
   - 256
   - 256
-  NUM_JOINTS: 16
+  NUM_JOINTS: 15
   EXTRA:
     TARGET_TYPE: gaussian
     SIGMA: 2
