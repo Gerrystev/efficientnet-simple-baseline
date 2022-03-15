@@ -64,7 +64,7 @@ class HumanEva(JointsDataset):
 
         gt_db = []
         for a in anno:
-            image_name = a['image']
+            image_name = a['image'].replace('\\', '/' )
 
             joints_3d = np.zeros((self.num_joints, 3), dtype=np.float)
             joints_3d_vis = np.zeros((self.num_joints, 3), dtype=np.float)
