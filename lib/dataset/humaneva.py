@@ -22,23 +22,23 @@ from dataset.JointsDataset import JointsDataset
 
 logger = logging.getLogger(__name__)
 
-HUMANEVA_KEYPOINTS = {
-    0: 'pelvis',
-    1: 'thorax',
-    2: 'lsho',
-    3: 'lelb',
-    4: 'lwri',
-    5: 'rsho',
-    6: 'relb',
-    7: 'rwri',
-    8: 'lhip',
-    9: 'lknee',
-    10: 'lankl',
-    11: 'rhip',
-    12: 'rknee',
-    13: 'rankl',
-    14: 'head'
-}
+HUMANEVA_KEYPOINTS = np.array([
+    'pelvis',
+    'thorax',
+    'lsho',
+    'lelb',
+    'lwri',
+    'rsho',
+    'relb',
+    'rwri',
+    'lhip',
+    'lknee',
+    'lankl',
+    'rhip',
+    'rknee',
+    'rankl',
+    'head'
+])
 
 class HumanEva(JointsDataset):
     def __init__(self, cfg, root, image_set, is_train, transform=None):
@@ -95,8 +95,9 @@ class HumanEva(JointsDataset):
         preds = preds[:, :, 0:2] + 1.0
 
         if output_dir:
-            pred_file = os.path.join(output_dir, 'pred.mat')
-            savemat(pred_file, mdict={'preds': preds})
+            pred_file = os.path.join(output_dir, 'pred.json')
+            with open(pred_file, 'w') as outfile:
+                outfile.write(json_tricks.dumps(preds))
 
         if 'test' in cfg.DATASET.TEST_SET:
             return {'Null': 0.0}, 0.0
@@ -106,31 +107,32 @@ class HumanEva(JointsDataset):
 
         gt_file = os.path.join(cfg.DATASET.ROOT,
                                'annot',
-                               'gt_{}.mat'.format(cfg.DATASET.TEST_SET))
-        gt_dict = loadmat(gt_file)
-        dataset_joints = gt_dict['dataset_joints']
-        jnt_missing = gt_dict['jnt_missing']
-        pos_gt_src = gt_dict['pos_gt_src']
-        headboxes_src = gt_dict['headboxes_src']
+                               '{}.json'.format(cfg.DATASET.TEST_SET))
 
+        with open(file_name) as valid_file:
+            gt_dict = json.load(valid_file)
+
+        pos_gt_src = np.array([d['joints'] for d in gt_dict])
+        print("<= PREDICTION")
+        print(preds)
         pos_pred_src = np.transpose(preds, [1, 2, 0])
 
-        head = np.where(dataset_joints == 'head')[1][0]
-        lsho = np.where(dataset_joints == 'lsho')[1][0]
-        lelb = np.where(dataset_joints == 'lelb')[1][0]
-        lwri = np.where(dataset_joints == 'lwri')[1][0]
-        lhip = np.where(dataset_joints == 'lhip')[1][0]
-        lkne = np.where(dataset_joints == 'lkne')[1][0]
-        lank = np.where(dataset_joints == 'lank')[1][0]
+        head = np.where(HUMANEVA_KEYPOINTS == 'head')[0][0]
+        lsho = np.where(HUMANEVA_KEYPOINTS == 'lsho')[0][0]
+        lelb = np.where(HUMANEVA_KEYPOINTS == 'lelb')[0][0]
+        lwri = np.where(HUMANEVA_KEYPOINTS == 'lwri')[0][0]
+        lhip = np.where(HUMANEVA_KEYPOINTS == 'lhip')[0][0]
+        lkne = np.where(HUMANEVA_KEYPOINTS == 'lkne')[0][0]
+        lank = np.where(HUMANEVA_KEYPOINTS == 'lank')[0][0]
 
-        rsho = np.where(dataset_joints == 'rsho')[1][0]
-        relb = np.where(dataset_joints == 'relb')[1][0]
-        rwri = np.where(dataset_joints == 'rwri')[1][0]
-        rkne = np.where(dataset_joints == 'rkne')[1][0]
-        rank = np.where(dataset_joints == 'rank')[1][0]
-        rhip = np.where(dataset_joints == 'rhip')[1][0]
+        rsho = np.where(HUMANEVA_KEYPOINTS == 'rsho')[0][0]
+        relb = np.where(HUMANEVA_KEYPOINTS == 'relb')[0][0]
+        rwri = np.where(HUMANEVA_KEYPOINTS == 'rwri')[0][0]
+        rkne = np.where(HUMANEVA_KEYPOINTS == 'rkne')[0][0]
+        rank = np.where(HUMANEVA_KEYPOINTS == 'rank')[0][0]
+        rhip = np.where(HUMANEVA_KEYPOINTS == 'rhip')[0][0]
 
-        jnt_visible = 1 - jnt_missing
+        torsosizes = pos_gt_src[lsho]
         uv_error = pos_pred_src - pos_gt_src
         uv_err = np.linalg.norm(uv_error, axis=1)
         headsizes = headboxes_src[1, :, :] - headboxes_src[0, :, :]
