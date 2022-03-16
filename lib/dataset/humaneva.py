@@ -97,19 +97,19 @@ class HumanEva(JointsDataset):
         if output_dir:
             pred_file = os.path.join(output_dir, 'pred.json')
             with open(pred_file, 'w') as outfile:
-                outfile.write(json_tricks.dumps(preds))
+                outfile.write(json.dumps(preds))
 
         if 'test' in cfg.DATASET.TEST_SET:
             return {'Null': 0.0}, 0.0
 
         SC_BIAS = 0.6
-        threshold = 0.5
+        threshold = 0.2
 
         gt_file = os.path.join(cfg.DATASET.ROOT,
                                'annot',
                                '{}.json'.format(cfg.DATASET.TEST_SET))
 
-        with open(file_name) as valid_file:
+        with open(gt_file) as valid_file:
             gt_dict = json.load(valid_file)
 
         pos_gt_src = np.array([d['joints'] for d in gt_dict])
@@ -132,16 +132,7 @@ class HumanEva(JointsDataset):
         rank = np.where(HUMANEVA_KEYPOINTS == 'rank')[0][0]
         rhip = np.where(HUMANEVA_KEYPOINTS == 'rhip')[0][0]
 
-        torsosizes = pos_gt_src[lsho]
-        uv_error = pos_pred_src - pos_gt_src
-        uv_err = np.linalg.norm(uv_error, axis=1)
-        headsizes = headboxes_src[1, :, :] - headboxes_src[0, :, :]
-        headsizes = np.linalg.norm(headsizes, axis=0)
-        headsizes *= SC_BIAS
-        scale = np.multiply(headsizes, np.ones((len(uv_err), 1)))
-        scaled_uv_err = np.divide(uv_err, scale)
-        scaled_uv_err = np.multiply(scaled_uv_err, jnt_visible)
-        jnt_count = np.sum(jnt_visible, axis=1)
+        torsosizes = pos_gt_src[:][lsho] - pos_gt_src[:][rhip]
         less_than_threshold = np.multiply((scaled_uv_err <= threshold),
                                           jnt_visible)
         PCKh = np.divide(100.*np.sum(less_than_threshold, axis=1), jnt_count)
