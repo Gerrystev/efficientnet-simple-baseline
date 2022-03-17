@@ -86,7 +86,7 @@ def train(config, train_loader, model, criterion, optimizer, epoch,
                               prefix)
 
 
-def validate(config, val_loader, val_dataset, model, criterion, output_dir,
+def validate(epoch, config, val_loader, val_dataset, model, criterion, output_dir,
              tb_log_dir, writer_dict=None):
     batch_time = AverageMeter()
     losses = AverageMeter()
@@ -174,7 +174,7 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
                                   prefix)
 
         name_values, perf_indicator = val_dataset.evaluate(
-            config, all_preds, output_dir, all_boxes, image_path,
+            epoch, config, all_preds, output_dir, all_boxes, image_path,
             filenames, imgnums)
 
         _, full_arch_name = get_model_name(config)

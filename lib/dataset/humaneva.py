@@ -12,10 +12,9 @@ from collections import OrderedDict
 import logging
 import os
 import json_tricks as json
-import re
 
 import numpy as np
-from scipy.io import loadmat, savemat
+import pandas as pd
 
 from dataset.JointsDataset import JointsDataset
 
@@ -32,11 +31,11 @@ HUMANEVA_KEYPOINTS = np.array([
     'relb',
     'rwri',
     'lhip',
-    'lknee',
-    'lankl',
+    'lkne',
+    'lank',
     'rhip',
-    'rknee',
-    'rankl',
+    'rkne',
+    'rank',
     'head'
 ])
 
@@ -90,7 +89,7 @@ class HumanEva(JointsDataset):
 
         return gt_db
 
-    def evaluate(self, cfg, preds, output_dir, *args, **kwargs):
+    def evaluate(self, epoch, cfg, preds, output_dir, *args, **kwargs):
         # convert 0-based index to 1-based index
         preds = preds[:, :, 0:2] + 1.0
 
@@ -102,9 +101,7 @@ class HumanEva(JointsDataset):
         if 'test' in cfg.DATASET.TEST_SET:
             return {'Null': 0.0}, 0.0
 
-        SC_BIAS = 0.6
-        threshold = 0.2
-
+        joint_num = 15
         gt_file = os.path.join(cfg.DATASET.ROOT,
                                'annot',
                                '{}.json'.format(cfg.DATASET.TEST_SET))
@@ -112,12 +109,11 @@ class HumanEva(JointsDataset):
         with open(gt_file) as valid_file:
             gt_dict = json.load(valid_file)
 
-        pos_gt_src = np.array([d['joints'] for d in gt_dict])
-        print("<= PREDICTION")
-        print(preds)
-        pos_pred_src = np.transpose(preds, [1, 2, 0])
+        gt = np.array([d['joints'] for d in gt_dict])
 
         head = np.where(HUMANEVA_KEYPOINTS == 'head')[0][0]
+        pelv = np.where(HUMANEVA_KEYPOINTS == 'pelvis')[0][0]
+        thor = np.where(HUMANEVA_KEYPOINTS == 'thorax')[0][0]
         lsho = np.where(HUMANEVA_KEYPOINTS == 'lsho')[0][0]
         lelb = np.where(HUMANEVA_KEYPOINTS == 'lelb')[0][0]
         lwri = np.where(HUMANEVA_KEYPOINTS == 'lwri')[0][0]
@@ -132,40 +128,53 @@ class HumanEva(JointsDataset):
         rank = np.where(HUMANEVA_KEYPOINTS == 'rank')[0][0]
         rhip = np.where(HUMANEVA_KEYPOINTS == 'rhip')[0][0]
 
-        torsosizes = pos_gt_src[:][lsho] - pos_gt_src[:][rhip]
-        less_than_threshold = np.multiply((scaled_uv_err <= threshold),
-                                          jnt_visible)
-        PCKh = np.divide(100.*np.sum(less_than_threshold, axis=1), jnt_count)
+        # calculate torso diameters
+        torsosizesX = np.subtract(gt[:, lsho, 0], gt[:, rhip, 0])
+        torsosizesY = np.subtract(gt[:, lsho, 1], gt[:, rhip, 1])
 
-        # save
-        rng = np.arange(0, 0.5+0.01, 0.01)
-        pckAll = np.zeros((len(rng), 16))
+        torsodiameter = np.sqrt(np.power(torsosizesX, 2) + np.power(torsosizesY, 2))
+        torsosizes = np.sqrt(np.power(torsosizesX, 2) + np.power(torsosizesY, 2))
 
-        for r in range(len(rng)):
-            threshold = rng[r]
-            less_than_threshold = np.multiply(scaled_uv_err <= threshold,
-                                              jnt_visible)
-            pckAll[r, :] = np.divide(100.*np.sum(less_than_threshold, axis=1),
-                                     jnt_count)
+        # reshape torsosizes for comparison with distance
+        for i in range(joint_num - 1):
+            torsosizes = np.vstack((torsosizes, torsodiameter))
 
-        PCKh = np.ma.array(PCKh, mask=False)
-        PCKh.mask[6:8] = True
+        torsosizes = np.swapaxes(torsosizes, 0, 1)
 
-        jnt_count = np.ma.array(jnt_count, mask=False)
-        jnt_count.mask[6:8] = True
-        jnt_ratio = jnt_count / np.sum(jnt_count).astype(np.float64)
+        # calculate pred and gt distance
+        distanceX = np.subtract(preds[:, :, 0], gt[:, :, 0])
+        distanceY = np.subtract(preds[:, :, 1], gt[:, :, 1])
+
+        distance = np.sqrt(np.power(distanceX, 2) + np.power(distanceY, 2))
+
+        # if distance within threshold is one
+        pck = (distance <= 0.2 * torsosizes).astype(int)
+
+        # sum of correct keypoint every joint
+        lenPred = len(distance)
+        ckAll = pck.sum(axis=0)
+        pckAll = np.divide(100 * ckAll, lenPred)
 
         name_value = [
-            ('Head', PCKh[head]),
-            ('Shoulder', 0.5 * (PCKh[lsho] + PCKh[rsho])),
-            ('Elbow', 0.5 * (PCKh[lelb] + PCKh[relb])),
-            ('Wrist', 0.5 * (PCKh[lwri] + PCKh[rwri])),
-            ('Hip', 0.5 * (PCKh[lhip] + PCKh[rhip])),
-            ('Knee', 0.5 * (PCKh[lkne] + PCKh[rkne])),
-            ('Ankle', 0.5 * (PCKh[lank] + PCKh[rank])),
-            ('Mean', np.sum(PCKh * jnt_ratio)),
-            ('Mean@0.1', np.sum(pckAll[11, :] * jnt_ratio))
+            ('Epoch', epoch)
+            ('Head', pckAll[head]),
+            ('Pelvis', pckAll[pelv]),
+            ('Thorax', pckAll[thor]),
+            ('Shoulder', pckAll[lsho] + pckAll[rsho]),
+            ('Elbow', pckAll[lelb] + pckAll[relb]),
+            ('Wrist', pckAll[lwri] + pckAll[rwri]),
+            ('Hip', pckAll[lhip] + pckAll[rhip]),
+            ('Knee', pckAll[lkne] + pckAll[rkne]),
+            ('Ankle', pckAll[lank] + pckAll[rank]),
+            ('Mean', np.divide(np.sum(pckAll), lenPred * joint_num))
         ]
+
+        df = pd.DataFrame(name_value, columns=[
+            'Epoch', 'Head', 'Pelvis', 'Thorax', 'Shoulder', 'Elbow', 'Wrist', 'Hip', 'Knee', 'Ankle', 'Mean'
+        ])
+
+        df.to_csv('validation.csv', mode='a', header=not os.path.exists('validation.csv'))
+
         name_value = OrderedDict(name_value)
 
         return name_value, name_value['Mean']
