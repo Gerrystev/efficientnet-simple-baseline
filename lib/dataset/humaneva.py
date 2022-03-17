@@ -156,7 +156,7 @@ class HumanEva(JointsDataset):
         pckAll = np.divide(100 * ckAll, lenPred)
 
         name_value = [
-            ('Epoch', epoch)
+            ('Epoch', epoch),
             ('Head', pckAll[head]),
             ('Pelvis', pckAll[pelv]),
             ('Thorax', pckAll[thor]),
