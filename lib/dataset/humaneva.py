@@ -169,10 +169,21 @@ class HumanEva(JointsDataset):
             ('Mean', np.divide(np.sum(pckAll), lenPred * joint_num))
         ]
 
-        df = pd.DataFrame(name_value, columns=[
-            'Epoch', 'Head', 'Pelvis', 'Thorax', 'Shoulder', 'Elbow', 'Wrist', 'Hip', 'Knee', 'Ankle', 'Mean'
-        ])
+        df_dict = {
+            'Epoch': [epoch],
+            'Head': [pckAll[head]],
+            'Pelvis': [pckAll[pelv]],
+            'Thorax': [pckAll[thor]],
+            'Shoulder': [pckAll[lsho] + pckAll[rsho]],
+            'Elbow': [pckAll[lelb] + pckAll[relb]],
+            'Wrist': [pckAll[lwri] + pckAll[rwri]],
+            'Hip': [pckAll[lhip] + pckAll[rhip]],
+            'Knee': [pckAll[lkne] + pckAll[rkne]],
+            'Ankle': [pckAll[lank] + pckAll[rank]],
+            'Mean': [np.divide(np.sum(pckAll), lenPred * joint_num)]
+        }
 
+        df = pd.DataFrame(df_dict)
         df.to_csv('validation.csv', mode='a', header=not os.path.exists('validation.csv'))
 
         name_value = OrderedDict(name_value)
