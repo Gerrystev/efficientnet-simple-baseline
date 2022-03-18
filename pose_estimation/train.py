@@ -99,7 +99,7 @@ def main():
     logger, final_output_dir, tb_log_dir = create_logger(
         config, args.cfg, 'train')
 
-    final_output_dir = "/content/drive/MyDrive/Weights/efficientnet_simple_baseline"
+    final_output_dir = "/content/drive/MyDrive/Weights/efficientnet_simple_baseline_mpii"
     logger.info(pprint.pformat(args))
     logger.info(pprint.pformat(config))
 
