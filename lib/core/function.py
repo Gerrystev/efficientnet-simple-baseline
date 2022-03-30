@@ -143,15 +143,20 @@ def validate(epoch, config, val_loader, val_dataset, model, criterion, output_di
             batch_time.update(time.time() - end)
             end = time.time()
 
+            c = meta['center'].numpy()
+            s = meta['scale'].numpy()
             score = meta['score'].numpy()
 
             preds, maxvals = get_final_preds(
-                config, output.clone().cpu().numpy()
+                config, output.clone().cpu().numpy(), c, s
             )
 
             all_preds[idx:idx + num_images, :, 0:2] = preds[:, :, 0:2]
             all_preds[idx:idx + num_images, :, 2:3] = maxvals
             # double check this all_boxes parts
+            all_boxes[idx:idx + num_images, 0:2] = c[:, 0:2]
+            all_boxes[idx:idx + num_images, 2:4] = s[:, 0:2]
+            all_boxes[idx:idx + num_images, 4] = np.prod(s * 200, 1)
             all_boxes[idx:idx + num_images, 5] = score
             image_path.extend(meta['image'])
             if config.DATASET.DATASET == 'posetrack':

@@ -82,25 +82,15 @@ class JointsDataset(Dataset):
         joints = db_rec['joints_3d']
         joints_vis = db_rec['joints_3d_vis']
 
-        c = db_rec['center']
-        s = db_rec['scale']
         score = db_rec['score'] if 'score' in db_rec else 1
-        r = 0
 
         if self.is_train:
-            sf = self.scale_factor
-            rf = self.rotation_factor
-            s = s * np.clip(np.random.randn()*sf + 1, 1 - sf, 1 + sf)
-            r = np.clip(np.random.randn()*rf, -rf*2, rf*2) \
-                if random.random() <= 0.6 else 0
-
             if self.flip and random.random() <= 0.5:
                 data_numpy = data_numpy[:, ::-1, :]
                 joints, joints_vis = fliplr_joints(
                     joints, joints_vis, data_numpy.shape[1], self.flip_pairs)
-                c[0] = data_numpy.shape[1] - c[0] - 1
 
-        trans = get_affine_transform(c, s, r, self.image_size)
+        trans = np.ones((2, 3), dtype=np.float32)
         input = cv2.warpAffine(
             data_numpy,
             trans,
@@ -125,9 +115,6 @@ class JointsDataset(Dataset):
             'imgnum': imgnum,
             'joints': joints,
             'joints_vis': joints_vis,
-            'center': c,
-            'scale': s,
-            'rotation': r,
             'score': score
         }
 
