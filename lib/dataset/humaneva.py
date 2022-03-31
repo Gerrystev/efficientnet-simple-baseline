@@ -185,7 +185,6 @@ class HumanEva(JointsDataset):
         ]
 
         df_dict = {
-            'Epoch': [epoch],
             'Head': [pckAll[head]],
             'Pelvis': [pckAll[pelv]],
             'Thorax': [pckAll[thor]],
