@@ -55,22 +55,35 @@ class HumanEva(JointsDataset):
         logger.info('=> load {} samples'.format(len(self.db)))
 
     def _get_db(self):
-        # load dataset from .npz file and convert to dictionary
-        file_name = os.path.join(self.root, 'annot', self.image_set + '.json')
-
+        # create train/val split
+        file_name = os.path.join(self.root,
+                                 'annot',
+                                 self.image_set + '.json')
         with open(file_name) as anno_file:
             anno = json.load(anno_file)
 
         gt_db = []
         for a in anno:
-            image_name = a['image'].replace('\\', '/' )
+            image_name = a['image'].replace('\\', '/')
+
+            c = np.array(a['center'], dtype=np.float)
+            s = np.array([a['scale'], a['scale']], dtype=np.float)
+
+            # Adjust center/scale slightly to avoid cropping limbs
+            if c[0] != -1:
+                c[1] = c[1] + 15 * s[1]
+                s = s * 1.25
+
+            # MPII uses matlab format, index is based 1,
+            # we should first convert to 0-based index
+            c = c - 1
 
             joints_3d = np.zeros((self.num_joints, 3), dtype=np.float)
             joints_3d_vis = np.zeros((self.num_joints, 3), dtype=np.float)
             if self.image_set != 'test':
                 joints = np.array(a['joints'])
                 joints[:, 0:2] = joints[:, 0:2] - 1
-                joints_vis = np.array([1 for i in range(self.num_joints)])
+                joints_vis = np.array(a['joints_vis'])
                 assert len(joints) == self.num_joints, \
                     'joint num diff: {} vs {}'.format(len(joints),
                                                       self.num_joints)
@@ -79,13 +92,16 @@ class HumanEva(JointsDataset):
                 joints_3d_vis[:, 0] = joints_vis[:]
                 joints_3d_vis[:, 1] = joints_vis[:]
 
+            # image_dir = 'images.zip@' if self.data_format == 'zip' else 'images'
             gt_db.append({
                 'image': os.path.join(self.root, image_name),
+                'center': c,
+                'scale': s,
                 'joints_3d': joints_3d,
                 'joints_3d_vis': joints_3d_vis,
                 'filename': '',
                 'imgnum': 0,
-                })
+            })
 
         return gt_db
 
