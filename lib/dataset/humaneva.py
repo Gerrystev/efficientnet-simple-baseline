@@ -105,7 +105,7 @@ class HumanEva(JointsDataset):
 
         return gt_db
 
-    def evaluate(self, epoch, cfg, preds, output_dir, *args, **kwargs):
+    def evaluate(self, cfg, preds, output_dir, *args, **kwargs):
         # convert 0-based index to 1-based index
         preds = preds[:, :, 0:2] + 1.0
 
