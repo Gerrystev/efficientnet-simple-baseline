@@ -86,7 +86,7 @@ def train(config, train_loader, model, criterion, optimizer, epoch,
                               prefix)
 
 
-def validate(epoch, config, val_loader, val_dataset, model, criterion, output_dir,
+def validate(config, val_loader, val_dataset, model, criterion, output_dir,
              tb_log_dir, writer_dict=None):
     batch_time = AverageMeter()
     losses = AverageMeter()
@@ -148,15 +148,14 @@ def validate(epoch, config, val_loader, val_dataset, model, criterion, output_di
             score = meta['score'].numpy()
 
             preds, maxvals = get_final_preds(
-                config, output.clone().cpu().numpy(), c, s
-            )
+                config, output.clone().cpu().numpy(), c, s)
 
             all_preds[idx:idx + num_images, :, 0:2] = preds[:, :, 0:2]
             all_preds[idx:idx + num_images, :, 2:3] = maxvals
             # double check this all_boxes parts
             all_boxes[idx:idx + num_images, 0:2] = c[:, 0:2]
             all_boxes[idx:idx + num_images, 2:4] = s[:, 0:2]
-            all_boxes[idx:idx + num_images, 4] = np.prod(s * 200, 1)
+            all_boxes[idx:idx + num_images, 4] = np.prod(s*200, 1)
             all_boxes[idx:idx + num_images, 5] = score
             image_path.extend(meta['image'])
             if config.DATASET.DATASET == 'posetrack':
@@ -179,7 +178,7 @@ def validate(epoch, config, val_loader, val_dataset, model, criterion, output_di
                                   prefix)
 
         name_values, perf_indicator = val_dataset.evaluate(
-            epoch, config, all_preds, output_dir, all_boxes, image_path,
+            config, all_preds, output_dir, all_boxes, image_path,
             filenames, imgnums)
 
         _, full_arch_name = get_model_name(config)
