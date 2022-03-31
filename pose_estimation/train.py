@@ -197,7 +197,7 @@ def main():
 
 
         # evaluate on validation set
-        perf_indicator = validate(epoch, config, valid_loader, valid_dataset, model,
+        perf_indicator = validate(config, valid_loader, valid_dataset, model,
                                   criterion, final_output_dir, tb_log_dir,
                                   writer_dict)
 
