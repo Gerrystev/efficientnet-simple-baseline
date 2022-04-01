@@ -108,7 +108,6 @@ class HumanEva(JointsDataset):
     def evaluate(self, cfg, preds, output_dir, *args, **kwargs):
         # convert 0-based index to 1-based index
         preds = preds[:, :, 0:2] + 1.0
-        print(preds.shape)
 
         if output_dir:
             pred_file = os.path.join(output_dir, 'pred.json')
@@ -168,7 +167,8 @@ class HumanEva(JointsDataset):
         pck = (distance <= 0.2 * torsosizes).astype(int)
 
         # sum of correct keypoint every joint
-        lenPred = len(distance)
+        print(len(distance))
+        lenPred = len(preds)
         ckAll = pck.sum(axis=0)
         pckAll = np.divide(100 * ckAll, lenPred)
 
