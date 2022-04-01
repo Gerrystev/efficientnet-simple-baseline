@@ -167,8 +167,7 @@ class HumanEva(JointsDataset):
         pck = (distance <= 0.2 * torsosizes).astype(int)
 
         # sum of correct keypoint every joint
-        print(len(distance))
-        lenPred = len(preds)
+        lenPred = len(distance)
         ckAll = pck.sum(axis=0)
         pckAll = np.divide(100 * ckAll, lenPred)
 
@@ -176,12 +175,12 @@ class HumanEva(JointsDataset):
             ('Head', pckAll[head]),
             ('Pelvis', pckAll[pelv]),
             ('Thorax', pckAll[thor]),
-            ('Shoulder', pckAll[lsho] + pckAll[rsho]),
-            ('Elbow', pckAll[lelb] + pckAll[relb]),
-            ('Wrist', pckAll[lwri] + pckAll[rwri]),
-            ('Hip', pckAll[lhip] + pckAll[rhip]),
-            ('Knee', pckAll[lkne] + pckAll[rkne]),
-            ('Ankle', pckAll[lank] + pckAll[rank]),
+            ('Shoulder', (pckAll[lsho] + pckAll[rsho])/2),
+            ('Elbow', (pckAll[lelb] + pckAll[relb])/2),
+            ('Wrist', (pckAll[lwri] + pckAll[rwri])/2),
+            ('Hip', (pckAll[lhip] + pckAll[rhip])/2),
+            ('Knee', (pckAll[lkne] + pckAll[rkne])/2),
+            ('Ankle', (pckAll[lank] + pckAll[rank])/2),
             ('Mean', np.divide(np.sum(pckAll), lenPred * joint_num))
         ]
 
@@ -189,12 +188,12 @@ class HumanEva(JointsDataset):
             'Head': [pckAll[head]],
             'Pelvis': [pckAll[pelv]],
             'Thorax': [pckAll[thor]],
-            'Shoulder': [pckAll[lsho] + pckAll[rsho]],
-            'Elbow': [pckAll[lelb] + pckAll[relb]],
-            'Wrist': [pckAll[lwri] + pckAll[rwri]],
-            'Hip': [pckAll[lhip] + pckAll[rhip]],
-            'Knee': [pckAll[lkne] + pckAll[rkne]],
-            'Ankle': [pckAll[lank] + pckAll[rank]],
+            'Shoulder': ([pckAll[lsho] + pckAll[rsho]])/2,
+            'Elbow': ([pckAll[lelb] + pckAll[relb]])/2,
+            'Wrist': ([pckAll[lwri] + pckAll[rwri]])/2,
+            'Hip': ([pckAll[lhip] + pckAll[rhip]])/2,
+            'Knee': ([pckAll[lkne] + pckAll[rkne]])/2,
+            'Ankle': ([pckAll[lank] + pckAll[rank]])/2,
             'Mean': [np.divide(np.sum(pckAll), lenPred * joint_num)]
         }
 
