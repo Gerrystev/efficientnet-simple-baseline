@@ -108,6 +108,7 @@ class HumanEva(JointsDataset):
     def evaluate(self, cfg, preds, output_dir, *args, **kwargs):
         # convert 0-based index to 1-based index
         preds = preds[:, :, 0:2] + 1.0
+        print(preds.shape)
 
         if output_dir:
             pred_file = os.path.join(output_dir, 'pred.json')
