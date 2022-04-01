@@ -188,12 +188,12 @@ class HumanEva(JointsDataset):
             'Head': [pckAll[head]],
             'Pelvis': [pckAll[pelv]],
             'Thorax': [pckAll[thor]],
-            'Shoulder': ([pckAll[lsho] + pckAll[rsho]])/2,
-            'Elbow': ([pckAll[lelb] + pckAll[relb]])/2,
-            'Wrist': ([pckAll[lwri] + pckAll[rwri]])/2,
-            'Hip': ([pckAll[lhip] + pckAll[rhip]])/2,
-            'Knee': ([pckAll[lkne] + pckAll[rkne]])/2,
-            'Ankle': ([pckAll[lank] + pckAll[rank]])/2,
+            'Shoulder': [(pckAll[lsho] + pckAll[rsho])/2],
+            'Elbow': [(pckAll[lelb] + pckAll[relb])/2],
+            'Wrist': [(pckAll[lwri] + pckAll[rwri])/2],
+            'Hip': [(pckAll[lhip] + pckAll[rhip])/2],
+            'Knee': [(pckAll[lkne] + pckAll[rkne])/2],
+            'Ankle': [(pckAll[lank] + pckAll[rank])/2],
             'Mean': [np.divide(np.sum(pckAll), lenPred * joint_num)]
         }
 
