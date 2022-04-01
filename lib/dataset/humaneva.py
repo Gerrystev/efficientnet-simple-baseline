@@ -181,7 +181,7 @@ class HumanEva(JointsDataset):
             ('Hip', (pckAll[lhip] + pckAll[rhip])/2),
             ('Knee', (pckAll[lkne] + pckAll[rkne])/2),
             ('Ankle', (pckAll[lank] + pckAll[rank])/2),
-            ('Mean', np.divide(np.sum(pckAll), lenPred * joint_num))
+            ('Mean', np.divide(100 * np.sum(ckAll), lenPred * joint_num))
         ]
 
         df_dict = {
@@ -194,7 +194,7 @@ class HumanEva(JointsDataset):
             'Hip': [(pckAll[lhip] + pckAll[rhip])/2],
             'Knee': [(pckAll[lkne] + pckAll[rkne])/2],
             'Ankle': [(pckAll[lank] + pckAll[rank])/2],
-            'Mean': [np.divide(np.sum(pckAll), lenPred * joint_num)]
+            'Mean': [np.divide(100 * np.sum(ckAll), lenPred * joint_num)]
         }
 
         df = pd.DataFrame(df_dict)
